@@ -1,24 +1,16 @@
 <html>
-
 <head>
-<title>adhs for {{src}}</title>
+    <title>adhs for {{src}}</title>
+    <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 </head>
-
 <body>
-    <h1>Ad-hoc SPARQL endpoint for {{src}}</h1>
-    <form action="{{host}}/sparql" method="get">
-        <textarea name="query" rows="12" cols="100">SELECT DISTINCT ?concept WHERE {
-    [] a ?concept .
-}</textarea>
-        <br />
-        <label>Result format:</label>
-        <select name="output" value="html">
-          <option value="text/html">HTML table</option>
-          <option value="application/sparql-results+json">JSON</option>
-          <option value="application/sparql-results+xml">XML</option>
-        </select>
-        <input type="submit" value="Run Query" />
-    </form>
+    <div id="yasgui"></div>
+    <script>
+        const yasgui = new Yasgui(document.getElementById("yasgui"), {
+            requestConfig: { endpoint: "{{host}}/sparql" },
+            copyEndpointOnNewTab: false,
+        });
+    </script>
 </body>
-
 </html>
