@@ -8,7 +8,7 @@ import argparse
 
 # command line parameters
 parser = argparse.ArgumentParser()
-parser.add_argument('file')
+parser.add_argument('files', nargs='+')
 parser.add_argument('--host', default='127.0.0.1', type=str)
 parser.add_argument('-p', '--port', default=5000, type=int)
 parser.add_argument('-i', '--input', default='guess', choices=[
@@ -35,14 +35,15 @@ _FORMATS = ['*/*', 'text/html', 'application/sparql-results+json', 'application/
 # new graph
 g = rdflib.Graph()
 
-# parse file into graph
-with open(args.file, 'r') as fi:
-    if args.input == 'guess':
-        fo = rdflib.util.guess_format(args.file)
-    else:
-        fo = args.input
+# parse files into graph
+for file in args.files:
+    with open(file, 'r') as fi:
+        if args.input == 'guess':
+            fo = rdflib.util.guess_format(file)
+        else:
+            fo = args.input
 
-    g.parse(fi, format=fo)
+        g.parse(fi, format=fo)
 
 # set up a micro service using flash
 app = Flask(__name__, static_url_path='')
@@ -63,7 +64,7 @@ def sparql_get():
         qres = g.query(request.args['query'])
         return get_response(qres, content)
     else:
-        return render_template('sparql.html', src=args.file, port=request.host)
+        return render_template('sparql.html', src=args.files, port=request.host)
 
 @app.route("/sparql", methods=['POST'])
 @consumes('application/x-www-form-urlencoded')
@@ -76,7 +77,7 @@ def sparql_post():
         qres = g.query(request.form['query'])
         return get_response(qres, content)
     else:
-        return render_template('sparql.html', src=args.file, port=request.host)
+        return render_template('sparql.html', src=args.files, port=request.host)
 
 def content_override(args):
     if 'format' in args:
@@ -96,5 +97,5 @@ def get_pref_content_type(request):
         return 'text/html'
 
 if __name__ == "__main__":
-    app.run(host=args.host,port=args.port)
+    app.run(host=args.host, port=args.port)
 
